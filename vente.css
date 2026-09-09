@@ -1149,6 +1149,24 @@ button, input { font-family: inherit; }
   .sticky-cta { padding: 10px 14px calc(10px + env(safe-area-inset-bottom)); }
   .sticky-cta-logo { display: none; }
   .sticky-cta .btn { width: 100%; }
+
+  /* La barre reste escamotée à l'arrivée : le bouton bleu de l'accroche est
+     déjà à l'écran, l'afficher en même temps ferait doublon. Elle monte dès
+     que le visiteur a dépassé ce bouton. */
+  .sticky-cta {
+    transform: translateY(115%);
+    pointer-events: none;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .sticky-cta.is-visible {
+    transform: none;
+    pointer-events: auto;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sticky-cta { transition: none; }
+  }
   .modal-card { padding: 28px 20px; }
   .method-section, .program-section, .faq-section { padding: 48px 0; }
   .includes-section { padding: 48px 0; }

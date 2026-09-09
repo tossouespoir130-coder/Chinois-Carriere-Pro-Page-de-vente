@@ -13,6 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initCurrentYear();
   initVideo();
   initIncludes();
+  initAnchors();
+  initStickyCta();
 });
 
 /* ==================== 1. TICKER DYNAMIQUE (3.2s) ==================== */
@@ -315,4 +317,59 @@ function initIncludes() {
   }, { threshold: 0.35 });
 
   items.forEach((item) => observer.observe(item));
+}
+
+/* ==================== 10. ANCRES INTERNES ==================== */
+/* Les liens « Je m'inscris » défilent jusqu'aux tarifs sans inscrire #tarifs
+   dans l'URL. Sans cela, l'ancre restait dans la barre d'adresse : un
+   rechargement, un partage du lien ou un retour sur la page faisait
+   atterrir le visiteur sur les prix au lieu de la bannière. */
+function initAnchors() {
+  const liens = document.querySelectorAll('a[href^="#"]');
+  if (!liens.length) return;
+
+  // Arrivée avec une ancre héritée d'un ancien lien : on repart du haut.
+  if (window.location.hash) {
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+    window.scrollTo(0, 0);
+  }
+
+  const sansAnimation = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  liens.forEach((lien) => {
+    const href = lien.getAttribute('href');
+    if (href === '#') return;
+
+    lien.addEventListener('click', (event) => {
+      const cible = document.querySelector(href);
+      if (!cible) return; // ancre morte : on laisse le navigateur faire
+      event.preventDefault();
+      cible.scrollIntoView({ behavior: sansAnimation ? 'auto' : 'smooth' });
+    });
+  });
+}
+
+/* ==================== 11. BARRE D'INSCRIPTION ESCAMOTABLE ==================== */
+/* Sur mobile la barre est masquée par défaut (voir vente.css) et n'apparaît
+   qu'une fois le bouton de l'accroche dépassé, pour ne pas afficher deux
+   fois le même appel à l'action. Sur ordinateur la règle CSS ne s'applique
+   pas : la barre y reste visible en permanence, la classe est sans effet. */
+function initStickyCta() {
+  const barre = document.querySelector('.sticky-cta');
+  const repere = document.querySelector('.hero-cta-group');
+  if (!barre || !repere) return;
+
+  // Sans IntersectionObserver, on affiche la barre plutôt que de la perdre.
+  if (!('IntersectionObserver' in window)) {
+    barre.classList.add('is-visible');
+    return;
+  }
+
+  const observateur = new IntersectionObserver((entrees) => {
+    const e = entrees[0];
+    // Visible seulement une fois le repère dépassé vers le haut.
+    barre.classList.toggle('is-visible', !e.isIntersecting && e.boundingClientRect.top < 0);
+  }, { threshold: 0 });
+
+  observateur.observe(repere);
 }
