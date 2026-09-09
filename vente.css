@@ -1116,19 +1116,10 @@ button, input { font-family: inherit; }
   color: rgba(255, 255, 255, 0.74);
 }
 
-.footer-divider { height: 1px; background: rgba(255, 255, 255, 0.18); margin: 24px 0; }
-
-.meta-disclaimer {
-  font-size: 0.78rem;
-  line-height: 1.6;
-  color: rgba(255, 255, 255, 0.64);
-}
-
 .footer-bottom {
-  margin-top: 24px;
-  padding-top: 18px;
-  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  margin-top: 22px;
   font-size: 0.82rem;
+  line-height: 1.6;
   color: rgba(255, 255, 255, 0.64);
 }
 
