@@ -108,7 +108,6 @@ button, input { font-family: inherit; }
   min-height: 48px; /* cible tactile mobile */
 }
 
-.btn:hover { transform: translateY(-2px) scale(1.02); }
 .btn:active { transform: translateY(0) scale(0.99); }
 
 .btn-primary {
@@ -117,10 +116,7 @@ button, input { font-family: inherit; }
   box-shadow: var(--shadow-cta);
 }
 
-.btn-primary:hover {
-  background: linear-gradient(135deg, var(--color-red) 0%, var(--color-red-deep) 100%);
-  box-shadow: 0 8px 24px rgba(217, 45, 32, 0.38);
-}
+
 
 .btn-outline {
   background: var(--color-white);
@@ -129,12 +125,7 @@ button, input { font-family: inherit; }
   box-shadow: none;
 }
 
-.btn-outline:hover {
-  background: var(--color-red);
-  border-color: var(--color-red);
-  color: var(--text-white);
-  box-shadow: 0 8px 24px rgba(217, 45, 32, 0.32);
-}
+
 
 .btn-lg {
   padding: 18px 34px;
@@ -165,6 +156,29 @@ button, input { font-family: inherit; }
   0% { left: -100%; }
   25% { left: 150%; }
   100% { left: 150%; }
+}
+
+/* Survols réservés aux appareils à pointeur : sur mobile, :hover se fige
+   après une pression et le bouton resterait rouge au lieu de bleu. */
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover { transform: translateY(-2px) scale(1.02); }
+
+  .btn-primary:hover {
+    background: linear-gradient(135deg, var(--color-red) 0%, var(--color-red-deep) 100%);
+    box-shadow: 0 8px 24px rgba(217, 45, 32, 0.38);
+  }
+
+  .btn-outline:hover {
+    background: var(--color-red);
+    border-color: var(--color-red);
+    color: var(--text-white);
+    box-shadow: 0 8px 24px rgba(217, 45, 32, 0.32);
+  }
+
+  .price-card.is-featured .btn-price:hover {
+    background: var(--color-red);
+    color: var(--text-white);
+  }
 }
 
 /* ==================== SECTION HEADERS ==================== */
@@ -258,14 +272,18 @@ button, input { font-family: inherit; }
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--color-blue);
+  background: var(--color-red);
   animation: pulse 1.8s infinite;
 }
 
 @keyframes pulse {
-  0%   { box-shadow: 0 0 0 0 rgba(2, 94, 231, 0.55); }
-  70%  { box-shadow: 0 0 0 9px rgba(2, 94, 231, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(2, 94, 231, 0); }
+  0%   { box-shadow: 0 0 0 0 rgba(217, 45, 32, 0.55); }
+  70%  { box-shadow: 0 0 0 9px rgba(217, 45, 32, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(217, 45, 32, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dot-pulse { animation: none; }
 }
 
 .hero-title {
@@ -845,11 +863,6 @@ button, input { font-family: inherit; }
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
 }
 
-.price-card.is-featured .btn-price:hover {
-  background: var(--color-red);
-  color: var(--text-white);
-}
-
 .pricing-footnote {
   text-align: center;
   font-size: 0.86rem;
@@ -1106,15 +1119,10 @@ button, input { font-family: inherit; }
 .footer-divider { height: 1px; background: rgba(255, 255, 255, 0.18); margin: 24px 0; }
 
 .meta-disclaimer {
-  font-size: 0.76rem;
+  font-size: 0.78rem;
   line-height: 1.6;
   color: rgba(255, 255, 255, 0.64);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
 }
-
-.meta-disclaimer strong { color: rgba(255, 255, 255, 0.72); }
 
 .footer-bottom {
   margin-top: 24px;
@@ -1153,10 +1161,13 @@ button, input { font-family: inherit; }
   .modal-card { padding: 28px 20px; }
   .method-section, .program-section, .faq-section { padding: 48px 0; }
   .includes-section { padding: 48px 0; }
-  .pricing-section { padding: 56px 0; }
+  .pricing-section { padding: 34px 0 52px; scroll-margin-top: 8px; }
+  .pricing-section .section-header { margin-bottom: 22px; }
+  .pricing-grid { gap: 16px; }
   .guarantee-section { padding: 12px 0 48px; }
   .method-card { padding: 24px 20px; }
-  .price-card { padding: 30px 22px 26px; }
+  .price-card { padding: 24px 20px 22px; }
+  .price-note { margin-bottom: 18px; }
 
   /* La garantie passe en colonne, icône au-dessus */
   .guarantee-box { flex-direction: column; padding: 26px 22px; gap: 16px; }
