@@ -4,44 +4,49 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-Single-page French-language landing page (funnel) for "Chinois Carrière Pro", a Mandarin-for-business masterclass by Espoir Chinois. Three files, no build system, no package manager, no dependencies. The only external resource is Google Fonts (Outfit + Plus Jakarta Sans).
+Two independent static pages for "Chinois Carrière Pro", a Mandarin-for-business programme by Espoir Chinois. No build system, no package manager, no dependencies. The only external resources are Google Fonts (Outfit + Plus Jakarta Sans) and, after a click, a YouTube embed.
 
 All UI copy and all code comments are in French. Keep new code and content in French.
 
+## The two pages
+
+| File | Role | Stylesheet |
+|---|---|---|
+| `index.html` | **Paid sales page** — the site root, what visitors get on the bare domain | `vente.css` |
+| `masterclass.html` | Older landing page for the free WhatsApp masterclass | `styles.css` |
+
+Both load `script.js`. The names are historical: `index.html` was renamed from `vente.html` so hosts (Vercel) serve the sales page at `/`, and the former `index.html` became `masterclass.html`. Hence the sales page uses `vente.css` — that mismatch is deliberate, not a leftover.
+
+`assets/` holds the web-optimised images (banner in two widths, logo plus its light-on-dark variant, video poster). The full-resolution originals sit at the repo root.
+
 ## Running
 
-There is no build, lint, or test step. Open `index.html` directly in a browser, or serve it to avoid file:// quirks:
+No build, lint, or test step. Open a page directly, or serve the folder:
 
 ```bash
-python3 -m http.server 8000   # then http://localhost:8000
+python3 -m http.server 8000   # http://localhost:8000
 ```
-
-Changes are picked up on reload; there is no watcher or hot reload.
 
 ## Architecture
 
-**`index.html`** — the whole page in document order: floating header → hero → carousel (`#impact`) → 3 pillars (`#piliers`) → before/after (`#transformation`) → instructor (`#presentateur`) → FAQ (`#faq`) → final CTA → WhatsApp modal → footer. Footer nav links point at those section ids.
+**`vente.css`** — design tokens in `:root`: the palette is deliberately restricted to `#025EE7` / `#000000` / `#FFFFFF`. Greys are blacks at low opacity, not new hues; `--color-bar` and `--color-footer` are the two exceptions, and `--color-red` exists only for button hover. Use the tokens, not literals. `/* ==== SECTION ==== */` banners mirror the HTML order.
 
-**`script.js`** — seven plain functions, six of them wired from one `DOMContentLoaded` listener at the top of the file. Each `init*` guards on element presence and returns early, so sections can be removed from the HTML without breaking the rest.
-
-**`styles.css`** — one stylesheet. Design tokens live in `:root` ([styles.css:6-56](styles.css#L6-L56)): color scale, `--font-heading`/`--font-body`, radii, shadows, and shared cubic-bezier transitions. Use the tokens rather than literal values. `/* ==== SECTION ==== */` banner comments mirror the HTML section order.
+**`script.js`** — plain functions, all wired from one `DOMContentLoaded` listener at the top. Each `init*` guards on element presence and returns early, which is why one file can serve two pages with different markup.
 
 ### Cross-cutting patterns worth knowing
 
-- **CTA → modal wiring is class-based.** Any button carrying `open-modal-btn` opens the registration modal ([script.js](script.js) `initModal`). Adding a new CTA anywhere on the page needs that class and no JS change.
+- **`handleFormSubmit` is intentionally global.** It is called from an inline `onsubmit` on the registration form, not from `DOMContentLoaded`. Renaming or scoping it breaks submission silently.
 
-- **`handleFormSubmit` is intentionally global.** It is invoked from an inline `onsubmit="handleFormSubmit(event)"` on the form ([index.html:600](index.html#L600)), not from `DOMContentLoaded`. Renaming it, wrapping it in a module, or scoping it will break form submission silently.
+- **Checkout is external.** Both price buttons are plain links to Chariow (`/chinoiscarriere/checkout` for the one-off, `/chinoiscarriere1/checkout` for the two-instalment plan). `payment.js` still holds a provider-agnostic Mobile Money adapter (PawaPay / CinetPay / Moneroo) but **is not loaded by any page** — it binds to `[data-plan]` buttons that no longer exist. Keep it only if a direct integration is planned.
 
-- **The form has no backend.** It validates name/phone/email client-side, then `window.open`s `https://api.whatsapp.com/send?text=...` and replaces the form's `innerHTML` with a success block. Leads are never stored or transmitted anywhere. Two consequences: the URL carries no phone number, so it lands on WhatsApp's contact picker rather than a specific recipient; and the collected phone number is not used in the generated message (only name and email are).
+- **The registration modal in `index.html` is unreachable.** Nothing opens it since the switch to Chariow links. Its markup and close handlers still work; it just has no trigger.
 
-- **Carousel state is manual.** Slides toggle via a `.active` class (`display: none` → `block`). Autoplay runs on a 20s interval alongside a separate 100ms interval driving the progress bar; hover sets an `isPaused` flag that makes both ticks no-op rather than clearing them. Dot buttons are hand-written in the HTML with `data-dot` indices — there are currently 4 slides but only 3 dots ([index.html:246-248](index.html#L246-L248)), so the fourth slide has no indicator. Adding a slide means adding its dot by hand.
+- **The video is a facade, not an embed.** `.video-facade` shows `assets/video-poster.jpg` with a blue play button; `initVideo` swaps in the YouTube iframe on first click. This is what allows a blue play button instead of YouTube's red one, and keeps the page light until the visitor asks for it.
 
-- **FAQ accordion measures height in JS.** Opening an item sets `max-height` from `scrollHeight`; only one item stays open at a time. Answer content that changes size after opening will be clipped unless re-measured.
+- **Offer animations replay on scroll.** `initIncludes` toggles `.in-view` on each `.include-item` via IntersectionObserver, on enter *and* leave, so the animation runs again on every pass. The check is drawn and visible at rest, so nothing disappears if the script fails.
 
-- **Responsive overrides are centralized, not colocated.** Both breakpoints (`max-width: 992px` and `max-width: 768px`) sit at the bottom of the stylesheet ([styles.css:1520](styles.css#L1520), [styles.css:1558](styles.css#L1558)). Mobile adjustments for a component go there, not next to the component's base rules.
+- **The sticky CTA is fixed at every screen size.** `.site-footer` carries `padding-bottom: 104px` to clear it. That clearance must live on the footer's own `padding` shorthand — an earlier separate `padding-bottom` rule was silently overridden by it.
 
-- The modal locks page scroll by writing `document.body.style.overflow` directly; anything else touching body overflow will fight it.
+- **Responsive overrides are centralized** at the bottom of each stylesheet, not next to the components.
 
-## Known gaps
-
-Footer legal links (`#mentions`, `#confidentialite`, `#cgv`) are placeholders that resolve to nothing.
+- `masterclass.html` has 4 carousel slides but only 3 dots; its footer legal links (`#mentions`, `#confidentialite`, `#cgv`) resolve to nothing.
