@@ -546,20 +546,6 @@ button, input { font-family: inherit; }
 
 .video-embed { border: 0; }
 
-.video-fallback {
-  max-width: 840px;
-  margin: 14px auto 0;
-  text-align: center;
-  font-size: 0.86rem;
-  color: var(--text-muted);
-}
-
-.video-fallback a {
-  color: var(--color-blue);
-  font-weight: 700;
-  text-decoration: underline;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .video-facade:hover .video-play { transform: translate(-50%, -50%); }
 }
