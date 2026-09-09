@@ -1116,8 +1116,15 @@ button, input { font-family: inherit; }
   color: rgba(255, 255, 255, 0.74);
 }
 
+/* Copyright à gauche, mention Meta rejetée à droite ; les deux passent l'un
+   sous l'autre quand la largeur ne suffit plus. */
 .footer-bottom {
   margin-top: 22px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px 32px;
   font-size: 0.82rem;
   line-height: 1.6;
   color: rgba(255, 255, 255, 0.64);
